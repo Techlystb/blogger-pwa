@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial‑scale=1.0">
+  <title>PWA Demo – Installable Blogger Page</title>
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#007bff">
+
+  <!-- Fallback icon for older browsers -->
+  <link rel="icon" href="/icon-192.png" sizes="192x192">
+
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    .header {
+      background: #007bff;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .content {
+      padding: 2rem;
+    }
+    #installBtn {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    #installBtn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>My Blogger PWA</h1>
+  </header>
+
+  <main class="content">
+    <p>This page is a Progressive Web App demo. Click the button when it appears to install.</p>
+    <p>After installation, you’ll be able to launch it from your home screen like a native app.</p>
+  </main>
+
+  <!-- Install App Button -->
+  <button id="installBtn">Install App</button>
+
+  <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    // 1. 서비스 워커 등록
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch(err => console.error('SW registration failed:', err));
+    }
+
+    // 2. beforeinstallprompt 이벤트 잡기
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+    });
+
+    // 3. 설치 버튼 클릭
+    installBtn.addEventListener('click', async () => {
+      installBtn.style.display = 'none';
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      console.log('User choice:', choice.outcome);
+      deferredPrompt = null;
+    });
+  </script>
+</body>
+</html>
